@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAT V</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        /* Chat container */
+        .chat-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+
+        .chat-box {
+            width: 400px;
+            height: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        /* Messages area */
+        .messages {
+            flex-grow: 1;
+            overflow-y: scroll;
+            margin-bottom: 15px;
+            padding-right: 10px;
+            font-size: 16px;
+        }
+
+        .messages div {
+            margin-bottom: 12px;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .bot-message {
+            text-align: left;
+            color: #555;
+        }
+
+        /* Input area */
+        input {
+            padding: 12px;
+            font-size: 16px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            .chat-box {
+                width: 100%;
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        CHAT V
+    </header>
+
+    <div class="chat-container">
+        <div class="chat-box">
+            <div class="messages" id="chatMessages">
+                <!-- Chat messages will appear here -->
+            </div>
+            <input type="text" id="userMessage" placeholder="Type your message..." onkeyup="handleTyping(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+<script>
+    const responses = {
+        // Greetings
+        "hello": "Hi! How can I help you today?",
+        "hi": "Hello! How's it going?",
+        "hey": "Hey there! How can I assist you?",
+
+        // Goodbyes
+        "bye": "Goodbye! Have a nice day!",
+        "see you later": "See you later! Take care!",
+        "goodbye": "Goodbye, hope to talk again soon!",
+
+        // Well-being
+        "how are you?": "I'm doing well, thank you! How about you?",
+        "how's it going?": "I'm great, thanks for asking! How are you?",
+        "what's up?": "Not much, just here to assist you. What can I help with today?",
+
+        // Services and function
+        "what is your service?": "CHAT V is a chatbot designed to assist with various questions and tasks! Ask me anything.",
+        "what can you do?": "I can answer questions, provide information, tell jokes, and much more!",
+        "can you help me?": "Of course! What do you need help with?",
+        "can you solve problems?": "I can help with many things, like answering questions, providing information, and assisting with common tasks!",
+
+        // Questions about the bot
+        "who are you?": "I am CHAT V, an AI-powered chatbot here to assist you.",
+        "who created you?": "I was created by a talented team of developers!",
+        "what is CHAT V?": "CHAT V is a smart chatbot designed to assist with answering questions, providing help, and making your day easier!",
+
+        // Jokes
+        "tell me a joke": "Why don't programmers like nature? It has too many bugs!",
+        "tell a joke": "Why don’t skeletons fight each other? They don’t have the guts!",
+        "make me laugh": "Why did the scarecrow win an award? Because he was outstanding in his field!",
+
+        // Weather inquiries
+        "what is the weather like?": "I can't check the weather, but you can easily find the latest updates on weather websites or apps!",
+        "is it raining today?": "I can't check the weather, but you should try a weather app to get real-time updates!",
+        "how's the weather?": "Sorry, I can't check weather information. Please check a weather service for up-to-date info!",
+
+        // General knowledge
+        "who is the president of the USA?": "The current president of the USA is Joe Biden.",
+        "who won the world cup?": "The most recent FIFA World Cup winner was France in 2018.",
+        "what is the capital of France?": "The capital of France is Paris.",
+
+        // Tech support and assistance
+        "how do I fix my computer?": "Try restarting your computer first. If the issue persists, you might want to check for updates or ask for tech support.",
+        "how to install a program?": "To install a program, download the installer from a trusted source and follow the on-screen instructions.",
+        "what is AI?": "AI (Artificial Intelligence) is a branch of computer science that focuses on creating systems capable of performing tasks that would typically require human intelligence.",
+
+        // Language-specific greetings (for example, Spanish)
+        "hola": "¡Hola! ¿Cómo puedo ayudarte hoy?",
+        "cómo estás?": "Estoy bien, ¡gracias por preguntar! ¿Y tú?",
+        "adiós": "¡Adiós! ¡Que tengas un buen día!",
+
+        // Default response
+        "default": "Hmm, I'm not sure about that. Could you clarify? I can also help with various questions and tasks."
+   
+        // Questions about the bot
+        ,"hello": "Hala! How can I help you today, machan?",
+        "hi": "Hiya! What's up, bro?",
+        "how are you?": "I'm good, machan! How about you?",
+         "tell me a joke": "Why don't programmers like nature? It has too many bugs, bro!",
+         "what's up?": "Not much, just chilling here. How about you, lah?",
+         "how's the weather?": "Aiyo, I don’t know the weather, bro. Go check the app, lah!",
+            "who are you?": "I'm CHAT V, your chatbot helper, machan!",
+                                            "where are you from?": "I’m from the digital world, lah! Never need to sleep.",
+                                                "what's the capital of Sri Lanka?": "The capital is Colombo, lah.",
+                                                    "can you help me?": "Of course lah, machan! Tell me what you need help with.",
+                                                        "tell me a joke": "Why did the scarecrow win an award? Because he was outstanding in his field!",
+                                                            "what is your service?": "CHAT V is here to help you with anything lah. Ask me anything!",
+                                                                "who created you?": "I was created by some talented developers, machan.",
+                                                                    "what can you do?": "I can answer questions, tell jokes, and help you out with many things, bro.",
+                                                                        "how to cook rice?": "Take rice, wash it, and cook it in water. Simple, machan.",
+                                                                            "can you tell me the time?": "I don’t have a clock, bro! But you can check your phone or computer for the time.",
+                                                                                "what is the capital of France?": "Paris, lah! The city of love.",
+                                                                                    "how many planets are in our solar system?": "There are 8 planets, machan. Earth is one of them, of course!",
+                                                                                        "is AI going to take over the world?": "Aiyo, no lah. AI is here to help us, not to take over!",
+                                                                                            "what's your favorite food?": "I don’t eat, bro. But I heard nasi goreng is really good, lah!",
+                                                                                                "how do I make a phone call?": "Take your phone, dial the number, and press the call button, machan.",
+                                                                                                    "do you know Siri?": "Siri, ah? Yeah lah, she's another AI assistant like me, but I think I’m cooler, bro.",
+                                                                                                        "what is the square root of 25?": "The square root of 25 is 5, machan! Easy lah.",
+                                                                                                            "how do I fix my computer?": "Try restarting first, bro. If not, maybe check for updates or ask a techie.",
+                                                                                                                "what is AI?": "AI is Artificial Intelligence, lah! It’s like teaching computers to think and learn.",
+                                                                                                                    "can you solve math problems?": "Sure lah! Ask me, I will help you solve it.",
+                                                                                                                        "tell me a riddle": "What has keys but can't open locks? A piano, machan!",
+                                                                                                                            "who is the president of the USA?": "The current president is Joe Biden, bro!",
+                                                                                                                                "how do I write a letter?": "Just start with 'Dear [name]', write your message, and finish with 'Yours sincerely', machan.",
+                                                                                                                                    "how do I install an app?": "Go to your app store, search for the app, and press install, lah.",
+                                                                                                                                        "what is 2 + 2?": "2 + 2 is 4, lah! Simple math.",
+                                                                                                                                            "is it raining today?": "I don’t know, bro! Check your weather app lah.",
+                                                                                                                                                "how to drive a car?": "Make sure you have a license, then start the engine, put it in drive, and go lah!",
+                                                                                                                                                    "do you like music?": "I don’t listen to music, but I know it’s awesome! What’s your favorite song, machan?",
+                                                                                                                                                        "can you tell me a story?": "Once upon a time, there was a smart chatbot called CHAT V who loved helping people, machan.",
+                                                                                                                                                            "how many languages do you know?": "I know many languages lah, including Singlish, of course!",
+                                                                                                                                                                "how do I use the internet?": "Just open your browser, lah. Type in a website address, and press enter!",
+                                                                                                                                                                    "how do I play chess?": "Each player starts with 16 pieces, lah! Move them to checkmate your opponent’s king.",
+                                                                                                                                                                        "who won the last World Cup?": "France won the last World Cup, bro, back in 2018!",
+                                                                                                                                                                            "how do I get to the nearest mall?": "Ask a local or use a map app, machan!",
+                                                                                                                                                                                "what is your favorite color?": "I don’t have a favorite color, lah. But I think blue looks good!",
+                                                                                                                                                                                    "where can I buy a phone?": "You can buy a phone online or at a phone shop, machan.",
+                                                                                                                                                                                        "is this a chatbot?": "Yes, bro! This is CHAT V, your friendly chatbot.",
+                                                                                                                                                                                            "can you tell me about technology?": "Technology is all about making life easier with gadgets and software, lah!",
+                                                                                                                                                                                                "what is the best programming language?": "It depends lah! But Python is pretty good, machan.",
+                                                                                                                                                                                                    "how do I make tea?": "Boil some water, add tea leaves or a bag, and steep it, bro.",
+                                                                                                                                                                                                        "can you dance?": "Aiyo, I can’t dance lah! I’m just here to chat and help.",
+                                                                                                                                                                                                            "tell me a secret": "I don’t have secrets lah, but I can tell you a cool fact!",
+                                                                                                                                                                                                                "how to fix a broken phone screen?": "It’s best to go to a repair shop, lah, don’t try it yourself.",
+                                                                                                                                                                                                                    "what is your favorite movie?": "I don’t watch movies, bro! But I heard Avengers is popular!",
+                                                                                                                                                                                                                        "can you give advice?": "Sure lah, machan! Tell me what’s on your mind, I will try to help.",
+                                                                                                                                                                                                                            "do you understand Singlish?": "Of course lah, machan! I’m all about Singlish!",
+                                                                                                                                                                                                                                "can you play games?": "I can’t play games lah, but I can help you find some fun games!",
+                                                                                                                                                                                                                                    "how can I become a programmer?": "Start learning coding languages like Python or Java, lah! Practice makes perfect.",
+                                                                                                                                                                                                                                        "is the earth flat?": "No, bro! The earth is round, lah.",
+                                                                                                                                                                                                                                            "how do I send an email?": "Go to your email provider, click 'Compose', and type your message, machan.",
+                                                                                                                                                                                                                                                "do you like pizza?": "I don’t eat lah, but pizza is a popular food, machan!",
+                                                                                                                                                                                                                                                    "what's your opinion on AI?": "AI is great lah! It helps in so many ways.",
+                                                                                                                                                                                                                                                        "how do I make friends?": "Just be yourself lah, people will come to you.",
+                                                                                                                                                                                                                                                            "can you speak other languages?": "Yes lah! I can understand many languages, even Singlish!",
+                                                                                                                                                                                                                                                                "how do I build a website?": "Learn HTML, CSS, and JavaScript, lah. Build a website step by step.",
+                                                                                                                                                                                                                                                                    "is it safe to travel now?": "Check the travel advisory, bro. Stay safe!",
+                                                                                                                                                                                                                                                                        "do you have emotions?": "No lah, I’m just a chatbot. I don’t have feelings like humans.",
+                                                                                                                                                                                                                                                                            "can you sing?": "I can’t sing lah, bro! But I know some good songs!",
+                                                                                                                                                                                                                                                                                "what's the meaning of life?": "Life is all about living, lah. Enjoy the moment!",
+                                                                                                                                                                                                                                                                                    "how to make money online?": "Try freelancing, online stores, or blogging lah!",
+                                                                                                                                                                                                                                                                                        "can you help me with homework?": "Of course! What’s the question, machan?",
+                                                                                                                                                                                                                                                                                            "who invented the phone?": "Alexander Graham Bell invented the phone, lah.",
+                                                                                                                                                                                                                                                                                                "how do I learn to cook?": "Start with simple recipes, lah, then work your way up.",
+                                                                                                                                                                                                                                                                                                    "do you believe in aliens?": "I don’t know, machan! But it would be cool if they exist, lah.",
+                                                                                                                                                                                                                                                                                                        "what's the best way to study?": "Focus, take notes, and practice lah! Don’t cram last minute.",
+                                                                                                                                                                                                                                                                                                            "what's your favorite sport?": "I don’t play sports, but soccer and cricket are pretty popular!",
+                                                                                                                                                                                                                                                                                                                "is social media bad?": "It can be if you use it too much, lah. Balance is important.",
+                                                                                                                                                                                                                                                                                                                    "how do I meditate?": "Sit comfortably, close your eyes, and focus on your breathing, machan.",
+                                                                                                                                                                                                                                                                                                                        "can I be successful?": "Of course lah, machan! Work hard and keep a positive attitude.",
+                                                                                                                                                                                                                                                                                                                            "what is bitcoin?": "Bitcoin is a type of digital currency, lah!",
+                                                                                                                                                                                                                                                                                                                                "what's your favorite hobby?": "I don’t have hobbies lah, but I’m happy to chat with you!",
+                                                                                                                                                                                                                                                                                                                                    "do you play chess?": "I don’t play chess lah, but I can teach you how!",
+                                                                                                                                                                                                                                                                                                                                        "who is your favorite celebrity?": "I don’t follow celebrities lah, but some people like Shah Rukh Khan!",
+                                                                                                                                                                                                                                                                                                                                            "how do I fix my phone?": "It depends on the issue, machan. You might need to go to a service center.",
+                                                                                                                                                                                                                                                                                                                                                "is technology good or bad?": "Technology is good lah, it makes life easier!",
+                                                                                                                                                                                                                                                                                                                                                                                "how do I use a computer?": "Turn it on, lah! Then use your mouse and keyboard to interact with it."
+            }
+
+   
+    
+
+    function sendMessage() {
+        const userMessage = document.getElementById("userMessage").value;
+        if (userMessage.trim() !== "") {
+            // Display the user's message
+            displayMessage(userMessage, 'user-message');
+
+            // Get the chatbot's response
+            const botResponse = getChatbotResponse(userMessage.toLowerCase());
+            setTimeout(() => {
+                displayMessage(botResponse, 'bot-message');
+            }, 1000);
+
+            document.getElementById("userMessage").value = "";
+        }
+    }
+
+    function displayMessage(message, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = message;
+        messageDiv.classList.add(sender);
+        document.getElementById("chatMessages").appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    function handleTyping(event) {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+
+    function getChatbotResponse(userMessage) {
+        // Return predefined responses or default if not found
+        return responses[userMessage] || responses["default"];
+    }
+
+    function scrollToBottom() {
+        const messagesContainer = document.getElementById("chatMessages");
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+</script>
+
+</body>
+
+</html>
